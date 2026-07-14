@@ -1,0 +1,26 @@
+# Backup files
+*.tar.gz
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+
+# Linux editor backup files
+*~
+
+# Cache files
+.cache/
+
+# Ignore generated backup directory
+backups/
+
+# Ignore test projects
+test-project/
+
+# VS Code files
+.vscode/
+
+# Miscellaneous
+.DS_Store
