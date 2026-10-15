@@ -1,74 +1,100 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-while true
-do
+# Interactive cleanup utility.
+# Destructive operations require confirmation. Temporary cleanup only removes
+# top-level regular files owned by the current user and older than 7 days.
 
-echo ""
-echo "========================================="
-echo "          SYSTEM CLEANUP TOOL"
-echo "========================================="
-echo ""
-echo "1. View Cache Directory Size"
-echo "2. View Temporary Files Size"
-echo "3. Clean Cache Files"
-echo "4. Clean Temporary Files"
-echo "5. Perform Complete Cleanup"
-echo "6. Exit"
-echo ""
-echo "Enter your choice:"
+set -u
 
-read choice
+CACHE_DIR="${HOME}/.cache"
+TEMP_DIR="/tmp"
 
-case $choice in
+pause() {
+    printf '\n'
+    read -r -p "Press Enter to return to the cleanup menu..." _ || true
+}
 
-1)
-    echo ""
-    echo "Cache Directory Size:"
-    du -sh ~/.cache 2>/dev/null
-    ;;
+confirm() {
+    local answer
+    read -r -p "$1 [y/N]: " answer || return 1
+    [[ "$answer" == "y" || "$answer" == "Y" ]]
+}
 
-2)
-    echo ""
-    echo "Temporary Files Size:"
-    du -sh /tmp 2>/dev/null
-    ;;
+show_cache_size() {
+    printf '\nCache directory size:\n'
+    if [[ -d "$CACHE_DIR" ]]; then
+        du -sh -- "$CACHE_DIR" 2>/dev/null || true
+    else
+        printf 'No cache directory found at %s\n' "$CACHE_DIR"
+    fi
+}
 
-3)
-    echo ""
-    echo "Cleaning Cache Files..."
-    rm -rf ~/.cache/*
-    echo "Cache files cleaned successfully."
-    ;;
+show_temp_size() {
+    printf '\nTemporary directory size:\n'
+    du -sh -- "$TEMP_DIR" 2>/dev/null || true
+    printf '\nCleanup only targets top-level regular files owned by you and older than 7 days.\n'
+}
 
-4)
-    echo ""
-    echo "Cleaning Temporary Files..."
-    rm -rf /tmp/*
-    echo "Temporary files cleaned successfully."
-    ;;
+clean_cache() {
+    if [[ ! -d "$CACHE_DIR" ]]; then
+        printf '\nNo cache directory found. Nothing to clean.\n'
+        return
+    fi
 
-5)
-    echo ""
-    echo "Performing Complete Cleanup..."
+    printf '\nThis will remove the contents of: %s\n' "$CACHE_DIR"
+    printf 'Applications may need to recreate cached data.\n'
+    if confirm "Continue with cache cleanup?"; then
+        find "$CACHE_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+        printf 'Cache cleanup completed.\n'
+    else
+        printf 'Cache cleanup cancelled.\n'
+    fi
+}
 
-    rm -rf ~/.cache/*
-    rm -rf /tmp/*
+clean_old_temp_files() {
+    printf '\nThis will remove top-level regular files in %s that are owned by your user and older than 7 days.\n' "$TEMP_DIR"
+    if confirm "Continue with temporary-file cleanup?"; then
+        find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type f -user "$(id -un)" -mtime +7 -delete
+        printf 'Old temporary-file cleanup completed.\n'
+    else
+        printf 'Temporary-file cleanup cancelled.\n'
+    fi
+}
 
-    echo ""
-    echo "System cleanup completed successfully."
-    ;;
+while true; do
+    printf '\n'
+    printf '%s\n' '========================================='
+    printf '%s\n' '          SYSTEM CLEANUP TOOL'
+    printf '%s\n' '========================================='
+    printf '%s\n' '1. View cache directory size'
+    printf '%s\n' '2. View temporary directory size'
+    printf '%s\n' '3. Clean cache files (confirmation required)'
+    printf '%s\n' '4. Clean old temporary files owned by you (7+ days)'
+    printf '%s\n' '5. Perform complete cleanup (confirmation for each step)'
+    printf '%s\n' '6. Exit'
+    printf '\n'
+    if ! read -r -p "Enter your choice [1-6]: " choice; then
+        printf '\nEnd of input; exiting cleanup tool.\n'
+        break
+    fi
 
-6)
-    echo ""
-    echo "Exiting System Cleanup Tool..."
-    break
-    ;;
-
-*)
-    echo ""
-    echo "Invalid choice. Please try again."
-    ;;
-
-esac
-
+    case "$choice" in
+        1) show_cache_size; pause ;;
+        2) show_temp_size; pause ;;
+        3) clean_cache; pause ;;
+        4) clean_old_temp_files; pause ;;
+        5)
+            clean_cache
+            clean_old_temp_files
+            pause
+            ;;
+        6)
+            printf '\nExiting System Cleanup Tool.\n'
+            break
+            ;;
+        *)
+            printf '\nInvalid choice. Please enter a number from 1 to 6.\n'
+            pause
+            ;;
+    esac
 done

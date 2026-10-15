@@ -1,45 +1,55 @@
 # Linux Automation Toolkit
 
-## Description
-
-Linux Automation Toolkit is a collection of shell scripts designed to automate common Linux system administration and development tasks. The project focuses on Linux automation, package management, system monitoring, backup utilities, and project scaffolding.
-
----
+A menu-driven Bash toolkit for common Linux system administration and development tasks. Run one launcher and choose a task instead of remembering each script path.
 
 ## Features
 
-- System Information Utility
-- Directory Backup Automation
-- Disk Usage Monitoring
-- Interactive System Cleanup Tool
-- Process Monitoring Utility
-- Interactive Package Update Manager
-- Project Setup Automation Tool
+- **Interactive main menu** to launch the tools from one place.
+- **System information:** hostname, user, OS, kernel, CPU, RAM, IP address, and date/time.
+- **Disk usage monitor:** filesystem utilization, usage warning, and largest directories.
+- **Process monitor:** CPU/memory-heavy processes, process count, uptime, and load.
+- **Directory backup:** create timestamped `.tar.gz` backups.
+- **System cleanup:** inspect cache/temp usage and perform confirmed cleanup.
+- **APT package manager:** inspect updates, update package lists, upgrade packages, and clean packages.
+- **Project setup:** create a starter project structure and optionally initialize Git.
+- **Quick Linux commands:** current directory, files, disk, memory, uptime, user/host, IP addresses, and top CPU processes.
 
----
+## Requirements
 
-## Technologies Used
+- Linux or WSL2 running a Linux distribution such as Ubuntu.
+- Bash and standard utilities such as `df`, `free`, `ps`, `tar`, and `find`.
+- `sudo` access for APT operations (only on Debian/Ubuntu-based systems).
+- Some optional commands, such as `lscpu`, may not exist on every minimal Linux installation.
 
-- Linux
-- Bash (Shell Scripting)
-- Git & GitHub
-- Linux System Administration Commands
+## Quick start
 
----
+Clone the repository and run the launcher from its root directory:
 
-## Project Structure
-
+```bash
+git clone https://github.com/khushalsahu/linux-automation-toolkit.git
+cd linux-automation-toolkit
+chmod +x toolkit.sh
+./toolkit.sh
 ```
-linux-automation-toolkit/
 
+You can also run it without changing file permissions:
+
+```bash
+bash toolkit.sh
+```
+
+Choose a number from the main menu. The selected utility runs and then returns you to the menu. Choose **Quick Linux commands** for common read-only commands.
+
+## Project structure
+
+```text
+linux-automation-toolkit/
+├── toolkit.sh
 ├── README.md
 ├── .gitignore
-
 ├── docs/
 ├── logs/
-
 └── scripts/
-
     ├── backup.sh
     ├── disk_usage_monitor.sh
     ├── package_update.sh
@@ -49,148 +59,28 @@ linux-automation-toolkit/
     └── system_info.sh
 ```
 
----
+## Individual scripts
 
-## Script Descriptions
+The scripts in `scripts/` can still be run individually:
 
-### system_info.sh
+- `system_info.sh` — summarize machine details.
+- `backup.sh` — prompt for a directory and create a timestamped compressed archive in the repository's `backups/` directory when launched through the main menu.
+- `disk_usage_monitor.sh` — inspect root filesystem usage and the largest directories under the current working directory.
+- `process_monitor.sh` — display process and load information.
+- `system_cleanup.sh` — view cache/temp sizes and optionally clean files.
+- `package_update.sh` — interactive APT maintenance menu for Debian/Ubuntu.
+- `project_setup.sh` — create a starter project directory.
 
-Displays:
+## Safety notes
 
-- Hostname
-- Username
-- Operating System
-- Kernel Version
-- CPU Information
-- RAM Information
-- IP Address
-- Current Date and Time
+- Cleanup operations can delete files. The cleanup menu asks for confirmation before removing cache files; temporary cleanup is limited to items in `/tmp` owned by the current user and older than seven days.
+- Package upgrades and removals can change the system. Review each action before choosing it, and only run APT options on a Debian/Ubuntu-based system.
+- Backups should be checked before deleting or changing the source directory.
+- Review shell scripts before running them on important systems. Test in a disposable VM or WSL environment first.
 
----
+## Concepts covered
 
-### backup.sh
-
-Features:
-
-- Takes backup of any directory.
-- Compresses the directory into a .tar.gz file.
-- Adds timestamp to backup files.
-- Automatically creates backup directories.
-
----
-
-### disk_usage_monitor.sh
-
-Features:
-
-- Displays disk usage statistics.
-- Shows current storage utilization.
-- Displays the largest directories.
-- Provides disk usage monitoring utilities.
-
----
-
-### system_cleanup.sh
-
-Interactive menu-driven utility.
-
-Features:
-
-- View cache directory size.
-- View temporary files size.
-- Clean cache files.
-- Clean temporary files.
-- Perform complete cleanup.
-- Exit utility.
-
----
-
-### process_monitor.sh
-
-Displays:
-
-- Top CPU consuming processes.
-- Top memory consuming processes.
-- Total running processes.
-- System uptime.
-- Load average.
-
----
-
-### package_update.sh
-
-Interactive menu-driven utility.
-
-Features:
-
-- Check available package updates.
-- Update package lists.
-- Upgrade installed packages.
-- Remove unnecessary packages.
-- Clean package cache.
-- Perform full system update.
-- Exit utility.
-
----
-
-### project_setup.sh
-
-Automates project creation.
-
-Features:
-
-- Creates project directory.
-- Creates README.md.
-- Creates .gitignore.
-- Creates src folder.
-- Creates docs folder.
-- Initializes Git repository (optional).
-
----
-
-## Concepts Covered
-
-- Shell Scripting
-- Linux Commands
-- File Management
-- Package Management
-- System Monitoring
-- Automation
-- Interactive CLI Tools
-- Git & GitHub Workflow
-
----
-
-## How to Run
-
-Move into the scripts directory:
-
-```bash
-cd scripts
-```
-
-Give executable permissions if required:
-
-```bash
-chmod +x filename.sh
-```
-
-Run the script:
-
-```bash
-./filename.sh
-```
-
----
-
-## Future Improvements
-
-- Logging support.
-- Command line argument support.
-- Colored terminal output.
-- Installation script.
-
----
+Bash scripting, Linux command-line utilities, file management, package management, monitoring, backups, interactive CLI design, and Git/GitHub workflows.
 
 ## Author
 
