@@ -15,7 +15,7 @@ fi
 
 pause() {
     printf '\n'
-    read -r -p "Press Enter to return to the menu..." _
+    read -r -p "Press Enter to return to the menu..." _ || true
 }
 
 run_script() {
@@ -68,7 +68,10 @@ basic_commands_menu() {
         printf '%s\n' '8. Show top CPU-consuming processes'
         printf '%s\n' '9. Return to main menu'
         printf '\n'
-        read -r -p "Choose an option [1-9]: " choice
+        if ! read -r -p "Choose an option [1-9]: " choice; then
+            printf '\nEnd of input; returning to main menu.\n'
+            return
+        fi
 
         case "$choice" in
             1) printf '\nCurrent directory:\n'; pwd ;;
@@ -121,7 +124,10 @@ main_menu() {
         printf '%s\n' ' 9. Exit'
         printf '%s\n' '================================================'
         printf '\n'
-        read -r -p "What would you like to do? [1-9]: " choice
+        if ! read -r -p "What would you like to do? [1-9]: " choice; then
+            printf '\nEnd of input; exiting Linux Automation Toolkit.\n'
+            return 0
+        fi
 
         case "$choice" in
             1) run_script "system_info.sh" ;;
