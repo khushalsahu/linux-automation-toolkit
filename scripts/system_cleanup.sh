@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Interactive cleanup utility.
-# Destructive operations require confirmation. Temporary cleanup is limited
-# to items owned by the current user that are older than 7 days.
+# Destructive operations require confirmation. Temporary cleanup only removes
+# top-level regular files owned by the current user and older than 7 days.
 
 set -u
 
@@ -11,12 +11,12 @@ TEMP_DIR="/tmp"
 
 pause() {
     printf '\n'
-    read -r -p "Press Enter to return to the cleanup menu..." _
+    read -r -p "Press Enter to return to the cleanup menu..." _ || true
 }
 
 confirm() {
     local answer
-    read -r -p "$1 [y/N]: " answer
+    read -r -p "$1 [y/N]: " answer || return 1
     [[ "$answer" == "y" || "$answer" == "Y" ]]
 }
 
@@ -32,7 +32,7 @@ show_cache_size() {
 show_temp_size() {
     printf '\nTemporary directory size:\n'
     du -sh -- "$TEMP_DIR" 2>/dev/null || true
-    printf '\nNote: cleanup only targets items owned by your user and older than 7 days.\n'
+    printf '\nCleanup only targets top-level regular files owned by you and older than 7 days.\n'
 }
 
 clean_cache() {
@@ -52,9 +52,9 @@ clean_cache() {
 }
 
 clean_old_temp_files() {
-    printf '\nThis will remove items in %s that are owned by your user and older than 7 days.\n' "$TEMP_DIR"
+    printf '\nThis will remove top-level regular files in %s that are owned by your user and older than 7 days.\n' "$TEMP_DIR"
     if confirm "Continue with temporary-file cleanup?"; then
-        find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -user "$(id -un)" -mtime +7 -exec rm -rf -- {} +
+        find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type f -user "$(id -un)" -mtime +7 -delete
         printf 'Old temporary-file cleanup completed.\n'
     else
         printf 'Temporary-file cleanup cancelled.\n'
@@ -73,7 +73,10 @@ while true; do
     printf '%s\n' '5. Perform complete cleanup (confirmation for each step)'
     printf '%s\n' '6. Exit'
     printf '\n'
-    read -r -p "Enter your choice [1-6]: " choice
+    if ! read -r -p "Enter your choice [1-6]: " choice; then
+        printf '\nEnd of input; exiting cleanup tool.\n'
+        break
+    fi
 
     case "$choice" in
         1) show_cache_size; pause ;;
